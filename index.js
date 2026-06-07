@@ -427,6 +427,7 @@ Ensure the summarizedArticles array contains an item for each article provided (
         summary: Array.isArray(sArt.summary) 
           ? sArt.summary 
           : [sArt.summary || sArt.description || "Read original source for details."],
+        description: originalArt?.description || "",
         url: originalArt ? originalArt.url : (sArt.url || ""),
         source: originalArt 
           ? (originalArt.source?.name || originalArt.source) 
@@ -507,6 +508,7 @@ Return a JSON object with exactly these keys: "title", "category", "summary".`;
       title: result.title || "Custom Summary",
       category: result.category || "General",
       summary: Array.isArray(result.summary) ? result.summary : [result.summary || ""],
+      description: content.length > 300 ? content.slice(0, 300) + "..." : content,
       source: sourceUrl ? new URL(sourceUrl).hostname.replace("www.", "") : "Custom Input",
       url: sourceUrl || "",
       publishedAt: new Date().toISOString()
