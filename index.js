@@ -9,7 +9,9 @@ const crypto = require("crypto");
 const app = express();
 const parser = new RSSParser();
 
-app.use(cors());
+app.use(cors({
+  origin: ["https://newsai-andhra.vercel.app", "http://localhost:5173", "http://localhost:5174"]
+}));
 app.use(express.json());
 
 const USERS_FILE = path.join(__dirname, "users.json");
