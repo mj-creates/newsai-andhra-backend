@@ -535,31 +535,6 @@ Return a JSON object with exactly these keys: "title", "category", "summary".`;
   }
 });
 
-app.get("/debug/test-fetch", async (req, res) => {
-  const urls = {
-    simpleRSS: "https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te",
-    simpleSearch: "https://news.google.com/rss/search?q=Guntur&hl=te&gl=IN&ceid=IN:te",
-    customSearch: "https://news.google.com/rss/search?q=(site:eenadu.net+OR+site:sakshi.com+OR+site:andhrajyothy.com)+(%E0%B0%97%E0%B1%81%E0%B0%82%E0%B0%9F%E0%B1%82%E0%B0%B0%E0%B1%81)+when:7d&hl=te&gl=IN&ceid=IN:te",
-    proxyRSS: "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fnews.google.com%2Frss%3Fhl%3Dte%26gl%3DIN%26ceid%3DIN%3Ate"
-  };
-
-  const results = {};
-  for (const [name, url] of Object.entries(urls)) {
-    try {
-      const response = await axios.get(url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-        },
-        timeout: 5000
-      });
-      results[name] = { status: response.status, length: response.data ? (typeof response.data === 'string' ? response.data.length : JSON.stringify(response.data).length) : 0 };
-    } catch (err) {
-      results[name] = { status: err.response?.status || "Error", message: err.message };
-    }
-  }
-  res.json(results);
-});
 
 app.listen(5000, () => {
   console.log("Backend running on http://localhost:5000");
