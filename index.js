@@ -283,6 +283,16 @@ app.post("/scrape", async (req, res) => {
   }
 });
 
+// Helper to fetch Google News RSS feed as JSON via a proxy to bypass IP blocking
+const fetchRSSAsJSON = async (searchUrl) => {
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(searchUrl)}`;
+  const response = await axios.get(url, { timeout: 10000 });
+  if (response.data && response.data.status === "ok") {
+    return response.data.items || [];
+  }
+  throw new Error(response.data?.message || "Failed to parse RSS via proxy");
+};
+
 // Main route
 app.get("/news/:district", async (req, res) => {
   const { district } = req.params;
@@ -294,13 +304,13 @@ app.get("/news/:district", async (req, res) => {
     // Restrict results to the last 7 days to keep feed fresh, and add cache-buster
     const searchUrl = `https://news.google.com/rss/search?q=(site:eenadu.net+OR+site:sakshi.com+OR+site:andhrajyothy.com)+(${queryTerms})+when:7d&hl=te&gl=IN&ceid=IN:te&_=${Date.now()}`;
 
-    const feed = await parser.parseURL(searchUrl);
+    const items = await fetchRSSAsJSON(searchUrl);
     
-    const articles = feed.items.map((item) => {
+    const articles = items.map((item) => {
       const { title, source } = cleanTitleAndSource(item.title);
       return {
         title: title,
-        description: item.contentSnippet || item.summary || "",
+        description: item.description || item.content || "",
         url: item.link || "",
         source: { name: source },
         publishedAt: item.pubDate || "",
@@ -312,12 +322,12 @@ app.get("/news/:district", async (req, res) => {
       // General fallback news from last 7 days
       const fallbackUrl = `https://news.google.com/rss/search?q=(site:eenadu.net+OR+site:sakshi.com+OR+site:andhrajyothy.com)+when:7d&hl=te&gl=IN&ceid=IN:te&_=${Date.now()}`;
       try {
-        const fallbackFeed = await parser.parseURL(fallbackUrl);
-        const fallbackArticles = fallbackFeed.items.map((item) => {
+        const fallbackItems = await fetchRSSAsJSON(fallbackUrl);
+        const fallbackArticles = fallbackItems.map((item) => {
           const { title, source } = cleanTitleAndSource(item.title);
           return {
             title: title,
-            description: item.contentSnippet || item.summary || "",
+            description: item.description || item.content || "",
             url: item.link || "",
             source: { name: source },
             publishedAt: item.pubDate || "",
@@ -335,7 +345,7 @@ app.get("/news/:district", async (req, res) => {
     res.json({ articles: filtered.slice(0, 15) });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch news", details: err.message });
+    res.status(500).json({ error: "Failed to fetch news" });
   }
 });
 
