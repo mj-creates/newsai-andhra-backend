@@ -529,7 +529,8 @@ app.get("/debug/test-fetch", async (req, res) => {
   const urls = {
     simpleRSS: "https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te",
     simpleSearch: "https://news.google.com/rss/search?q=Guntur&hl=te&gl=IN&ceid=IN:te",
-    customSearch: "https://news.google.com/rss/search?q=(site:eenadu.net+OR+site:sakshi.com+OR+site:andhrajyothy.com)+(%E0%B0%97%E0%B1%81%E0%B0%82%E0%B0%9F%E0%B1%82%E0%B0%B0%E0%B1%81)+when:7d&hl=te&gl=IN&ceid=IN:te"
+    customSearch: "https://news.google.com/rss/search?q=(site:eenadu.net+OR+site:sakshi.com+OR+site:andhrajyothy.com)+(%E0%B0%97%E0%B1%81%E0%B0%82%E0%B0%9F%E0%B1%82%E0%B0%B0%E0%B1%81)+when:7d&hl=te&gl=IN&ceid=IN:te",
+    proxyRSS: "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fnews.google.com%2Frss%3Fhl%3Dte%26gl%3DIN%26ceid%3DIN%3Ate"
   };
 
   const results = {};
@@ -542,7 +543,7 @@ app.get("/debug/test-fetch", async (req, res) => {
         },
         timeout: 5000
       });
-      results[name] = { status: response.status, length: response.data?.length || 0 };
+      results[name] = { status: response.status, length: response.data ? (typeof response.data === 'string' ? response.data.length : JSON.stringify(response.data).length) : 0 };
     } catch (err) {
       results[name] = { status: err.response?.status || "Error", message: err.message };
     }
