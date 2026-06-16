@@ -329,7 +329,7 @@ app.get("/news/:district", async (req, res) => {
     res.json({ articles: filtered.slice(0, 15) });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch news" });
+    res.status(500).json({ error: "Failed to fetch news", details: err.message });
   }
 });
 
